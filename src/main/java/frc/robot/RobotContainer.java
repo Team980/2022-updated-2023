@@ -5,9 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
+//import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Button;
+//import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.AimAuto;
@@ -31,8 +31,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+//import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+//import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -54,11 +56,11 @@ public class RobotContainer {
   private final Finder finder = new Finder();
   private final Targeting targeting = new Targeting();
 
-  private final XboxController xBox = new XboxController(2);
+  private final CommandXboxController xbox = new CommandXboxController(2);
 
-  private final Joystick wheel = new Joystick(0);
-  private final Joystick throttle = new Joystick(1);
-  private final Joystick prajBox = new Joystick(4);
+  private final CommandJoystick wheel = new CommandJoystick(0);
+  private final CommandJoystick throttle = new CommandJoystick(1);
+  private final CommandJoystick prajBox = new CommandJoystick(4);
   private final DriveBackwardCommand driveBackwardCommand = new DriveBackwardCommand(drivetrain, collector);
   private final SequentialCommandGroup shootTaxi = new SequentialCommandGroup(
     new FireCargoAuto(shooter, conveyor, true, targeting, collector) , 
@@ -135,12 +137,12 @@ public class RobotContainer {
     shifter.setDefaultCommand(new RunCommand(shifter::setLowGear, shifter) );
 
     conveyor.setDefaultCommand(new RunCommand(
-      () -> conveyor.runConveyor(xBox.getRightY()), 
+      () -> conveyor.runConveyor(xbox.getRightY()), 
       conveyor
       ));
 
       collector.setDefaultCommand(new RunCommand(
-      () -> collector.runCollector(xBox.getLeftY()),
+      () -> collector.runCollector(xbox.getLeftY()),
       collector
       ));
     
@@ -157,29 +159,46 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(throttle, 4).whenPressed(new RunCommand(shifter::setHighGear, shifter) );
+    throttle.button(4).onTrue(new RunCommand(shifter::setHighGear, shifter) );
+    throttle.button(3).onTrue(new RunCommand(shifter::setLowGear, shifter) );
+    throttle.button(5).onTrue(new RunCommand(
+      () -> shifter.autoShift(),
+      shifter
+      ));
+
+    /*new JoystickButton(throttle, 4).whenPressed(new RunCommand(shifter::setHighGear, shifter) );
     new JoystickButton(throttle, 3).whenPressed(new RunCommand(shifter::setLowGear, shifter) );
     new JoystickButton(throttle, 5).whenPressed(new RunCommand(
       () -> shifter.autoShift(),
       shifter
-      ));
+      ));*/
     // new JoystickButton(throttle, 7).whenPressed(new FireCargoAuto(shooter, conveyor, true, targeting, collector));
     // new JoystickButton(throttle, 8).whenPressed(new DriveBackwardCommand(drivetrain, collector));
     // new JoystickButton(throttle, 9).whenPressed(new TurnRobot(drivetrain, -70));
     // new JoystickButton(throttle, 10).whenPressed(new BallSeeker(drivetrain, finder , false));
     // new JoystickButton(throttle, 11).whenPressed(new CollectCargoCommand(collector, drivetrain, conveyor, false));//switch to false for dead reckoning
     // new JoystickButton(throttle, 12).whenPressed(new TurnRobot(drivetrain, 90));
-    new JoystickButton(throttle, 1).whileHeld(new AimTele(drivetrain, targeting));//TODO switch to aimTele for competition
+    throttle.button(1).whileTrue(new AimTele(drivetrain, targeting));
+    //new JoystickButton(throttle, 1).whileHeld(new AimTele(drivetrain, targeting));
     // new JoystickButton(throttle, 2).whenPressed(new FireCargoAuto(shooter, conveyor, false, targeting, collector));
 
-    new JoystickButton(xBox, Button.kA.value).whenPressed(new InstantCommand(collector::deployCollector, collector));
+    xbox.a().onTrue(new InstantCommand(collector::deployCollector, collector));
+    xbox.y().onTrue(new InstantCommand(collector::retractCollector, collector));
+    xbox.x().onTrue(new RunCommand(shooter::manualOverride, shooter));
+    xbox.start().onTrue(new FireCargoRange(shooter, targeting));
+    xbox.back().onTrue(new InstantCommand(shooter::stopMotor, shooter));
+    xbox.b().onTrue(new RunCommand(shooter::lowGoal, shooter));
+    xbox.pov(0).onTrue(new InstantCommand(climber::extend, climber));
+    xbox.pov(180).onTrue(new InstantCommand(climber::retract, climber));
+
+    /*new JoystickButton(xBox, Button.kA.value).whenPressed(new InstantCommand(collector::deployCollector, collector));
     new JoystickButton(xBox, Button.kY.value).whenPressed(new InstantCommand(collector::retractCollector, collector));
     new JoystickButton(xBox, Button.kX.value).whenPressed(new RunCommand(shooter::manualOverride, shooter));
     new JoystickButton(xBox, Button.kStart.value).whenPressed(new FireCargoRange(shooter, targeting));
     new JoystickButton(xBox, Button.kBack.value).whenPressed(new InstantCommand(shooter::stopMotor, shooter));
     new JoystickButton(xBox, Button.kB.value).whenPressed(new RunCommand(shooter::lowGoal, shooter));
     new POVButton(xBox, 0).whenPressed(new InstantCommand(climber::extend, climber));
-    new POVButton(xBox, 180).whenPressed(new InstantCommand(climber::retract, climber));
+    new POVButton(xBox, 180).whenPressed(new InstantCommand(climber::retract, climber));*/
 
 
   }
