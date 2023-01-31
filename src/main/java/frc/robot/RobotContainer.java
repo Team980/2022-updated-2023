@@ -5,7 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
+/*import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -17,7 +17,7 @@ import frc.robot.commands.CollectCargoCommand;
 import frc.robot.commands.DriveBackwardCommand;
 import frc.robot.commands.FireCargoAuto;
 import frc.robot.commands.FireCargoRange;
-import frc.robot.commands.TurnRobot;
+import frc.robot.commands.TurnRobot;*/
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Conveyor;
@@ -30,9 +30,10 @@ import frc.robot.subsystems.VelocityControlledShooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+/*import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;*/
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -54,9 +55,9 @@ public class RobotContainer {
   private final Finder finder = new Finder();
   private final Targeting targeting = new Targeting();
 
-  private final XboxController xBox = new XboxController(2);
+  private final CommandXboxController xbox = new CommandXboxController(2);
 
-  private final Joystick wheel = new Joystick(0);
+  /*private final Joystick wheel = new Joystick(0);
   private final Joystick throttle = new Joystick(1);
   private final Joystick prajBox = new Joystick(4);
   private final DriveBackwardCommand driveBackwardCommand = new DriveBackwardCommand(drivetrain, collector);
@@ -115,10 +116,10 @@ public class RobotContainer {
     new FireCargoAuto(shooter, conveyor, false, targeting, collector)
   );
 
-  SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+  SendableChooser<Command> autoChooser = new SendableChooser<Command>();*/
 
   public RobotContainer() {
-    autoChooser.setDefaultOption("Shoot and Taxi", shootTaxi);
+    /*autoChooser.setDefaultOption("Shoot and Taxi", shootTaxi);
     autoChooser.addOption("Seek Red", shootFindShootPixyRed);
     autoChooser.addOption("Seek Blue", shootFindShootPixyBlue);
     autoChooser.addOption("No Pixy", shootFindShootDR);
@@ -126,24 +127,24 @@ public class RobotContainer {
     autoChooser.addOption("Opposite Direction Blue", pixyOtherDirectionBlue);
     autoChooser.addOption("Taxi Only", driveBackwardCommand);
 
-    SmartDashboard.putData(autoChooser);
+    SmartDashboard.putData(autoChooser);*/
 
     drivetrain.setDefaultCommand(new RunCommand(
-      () -> drivetrain.driveRobot(throttle.getY(), wheel.getX()), 
+      () -> drivetrain.driveRobot(xbox.getLeftY(), xbox.getRightX()), 
       drivetrain
       ));
     shifter.setDefaultCommand(new RunCommand(shifter::setLowGear, shifter) );
 
     conveyor.setDefaultCommand(new RunCommand(
-      () -> conveyor.runConveyor(xBox.getRightY()), 
+      () -> conveyor.runConveyor(-xbox.getLeftTriggerAxis()), 
       conveyor
       ));
 
       collector.setDefaultCommand(new RunCommand(
-      () -> collector.runCollector(xBox.getLeftY()),
+      () -> collector.runCollector(xbox.getRightTriggerAxis()),
       collector
       ));
-    
+     
       shooter.enable();
 
     // Configure the button bindings
@@ -157,29 +158,40 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(throttle, 4).whenPressed(new RunCommand(shifter::setHighGear, shifter) );
+    xbox.rightStick().onTrue(new RunCommand(shifter::setHighGear, shifter));
+    xbox.leftStick().onTrue(new RunCommand(shifter::setLowGear, shifter));
+    xbox.rightBumper().whileTrue(new RunCommand(collector::spinCollector, collector));
+    xbox.leftBumper().whileTrue(new RunCommand(conveyor::down, conveyor));
+    xbox.y().onTrue(new RunCommand(shooter::demoSpeed, shooter));
+    xbox.x().onTrue(new InstantCommand(shooter::stopMotor, shooter));
+    xbox.b().onTrue(new InstantCommand(collector::retractCollector, collector));
+    xbox.a().onTrue(new InstantCommand(collector::deployCollector, collector));
+    xbox.pov(0).onTrue(new InstantCommand(climber::extend, climber));
+    xbox.pov(180).onTrue(new InstantCommand(climber::retract, climber));
+
+    /*new JoystickButton(throttle, 4).whenPressed(new RunCommand(shifter::setHighGear, shifter) );
     new JoystickButton(throttle, 3).whenPressed(new RunCommand(shifter::setLowGear, shifter) );
     new JoystickButton(throttle, 5).whenPressed(new RunCommand(
       () -> shifter.autoShift(),
       shifter
-      ));
+      ));*/
     // new JoystickButton(throttle, 7).whenPressed(new FireCargoAuto(shooter, conveyor, true, targeting, collector));
     // new JoystickButton(throttle, 8).whenPressed(new DriveBackwardCommand(drivetrain, collector));
     // new JoystickButton(throttle, 9).whenPressed(new TurnRobot(drivetrain, -70));
     // new JoystickButton(throttle, 10).whenPressed(new BallSeeker(drivetrain, finder , false));
     // new JoystickButton(throttle, 11).whenPressed(new CollectCargoCommand(collector, drivetrain, conveyor, false));//switch to false for dead reckoning
     // new JoystickButton(throttle, 12).whenPressed(new TurnRobot(drivetrain, 90));
-    new JoystickButton(throttle, 1).whileHeld(new AimTele(drivetrain, targeting));//TODO switch to aimTele for competition
+    //new JoystickButton(throttle, 1).whileHeld(new AimTele(drivetrain, targeting));//TODO switch to aimTele for competition
     // new JoystickButton(throttle, 2).whenPressed(new FireCargoAuto(shooter, conveyor, false, targeting, collector));
 
-    new JoystickButton(xBox, Button.kA.value).whenPressed(new InstantCommand(collector::deployCollector, collector));
+    /*new JoystickButton(xBox, Button.kA.value).whenPressed(new InstantCommand(collector::deployCollector, collector));
     new JoystickButton(xBox, Button.kY.value).whenPressed(new InstantCommand(collector::retractCollector, collector));
     new JoystickButton(xBox, Button.kX.value).whenPressed(new RunCommand(shooter::manualOverride, shooter));
     new JoystickButton(xBox, Button.kStart.value).whenPressed(new FireCargoRange(shooter, targeting));
     new JoystickButton(xBox, Button.kBack.value).whenPressed(new InstantCommand(shooter::stopMotor, shooter));
     new JoystickButton(xBox, Button.kB.value).whenPressed(new RunCommand(shooter::lowGoal, shooter));
     new POVButton(xBox, 0).whenPressed(new InstantCommand(climber::extend, climber));
-    new POVButton(xBox, 180).whenPressed(new InstantCommand(climber::retract, climber));
+    new POVButton(xBox, 180).whenPressed(new InstantCommand(climber::retract, climber));*/
 
 
   }
@@ -191,6 +203,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return autoChooser.getSelected();
+    //return autoChooser.getSelected();
+    return null;
   }
 }

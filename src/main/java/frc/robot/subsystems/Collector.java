@@ -9,7 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Collector extends SubsystemBase {
@@ -52,8 +52,8 @@ public class Collector extends SubsystemBase {
   }
 
   public void spinCollector(){
-    collect.set(.8);
-    grabber.set(1);
+    collect.set(-0.8);
+    grabber.set(-1);
   }
   
   public void runCollector(double speed){

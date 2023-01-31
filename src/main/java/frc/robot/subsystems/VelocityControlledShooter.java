@@ -78,4 +78,8 @@ public class VelocityControlledShooter extends PIDSubsystem {
   public void lowGoal() {
     setSetpoint(10);
   }
+
+  public void demoSpeed(){
+    setSetpoint(30);
+  }
 }
