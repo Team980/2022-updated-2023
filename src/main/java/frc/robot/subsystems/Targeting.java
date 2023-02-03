@@ -39,7 +39,7 @@ public class Targeting extends SubsystemBase {
     y = 100;
     a = -1;
 
-    limelight.getEntry("ledMode").setNumber(3);
+    limelight.getEntry("ledMode").setNumber(1);
     limelight.getEntry("camMode").setNumber(0);
     limelight.getEntry("pipeline").setNumber(0);
   }
