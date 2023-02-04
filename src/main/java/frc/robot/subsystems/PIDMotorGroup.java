@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 
-public class PIDMotorGroup extends PIDSubsystem implements MotorController {
+public class PIDMotorGroup extends PIDSubsystem implements MotorController{
   private MotorControllerGroup motors;
 
   private double kpLow;
@@ -26,6 +26,9 @@ public class PIDMotorGroup extends PIDSubsystem implements MotorController {
   private SimpleMotorFeedforward ffHigh;
 
   private boolean inLowGear;
+  private boolean manualOverride;
+
+  private double outputVoltage;
 
   /** Creates a new PIDMotorGroup. */
   public PIDMotorGroup(MotorControllerGroup motors, double maxVelocityLow, double ksLow, Encoder encoder, double kpLow, double maxVelocityHigh, double ksHigh, double kpHigh) {
@@ -39,18 +42,24 @@ public class PIDMotorGroup extends PIDSubsystem implements MotorController {
           this.kpLow = kpLow;
           this.kpHigh = kpHigh;
           this.inLowGear = true;
+          this.manualOverride = false;
+          enable();
 
           ffLow = new SimpleMotorFeedforward(ksLow, 12.0/maxVelocityLow);
           ffHigh = new SimpleMotorFeedforward(ksHigh, 12.0/maxVelocityHigh);
+          
   }
 
   @Override
   public void useOutput(double output, double setpoint) {
     // Use the output here
+    
     if(inLowGear) {
-      motors.setVoltage(output + ffLow.calculate(setpoint));
+      outputVoltage = output + ffLow.calculate(setpoint);
+      motors.setVoltage(outputVoltage);
     } else {
-      motors.setVoltage(output + ffHigh.calculate(setpoint));
+      outputVoltage = output + ffHigh.calculate(setpoint);
+      motors.setVoltage(outputVoltage);
     }
   }
 
@@ -63,7 +72,10 @@ public class PIDMotorGroup extends PIDSubsystem implements MotorController {
   @Override
   public void set(double speed) {
     // TODO Auto-generated method stub
-    if(inLowGear) {
+      if(manualOverride) {
+      motors.setVoltage(speed * 12);
+    } 
+    else if(inLowGear) {
       setSetpoint(speed * maxVelocityLow);
     }
     else {
@@ -92,7 +104,11 @@ public class PIDMotorGroup extends PIDSubsystem implements MotorController {
   @Override
   public void stopMotor() {
     // TODO Auto-generated method stub
-    setSetpoint(0);
+    if(manualOverride) {
+      motors.stopMotor();
+    } else {
+      setSetpoint(0);
+    }
   }
 
   public void shiftGear(boolean inLowGear) {
@@ -105,4 +121,20 @@ public class PIDMotorGroup extends PIDSubsystem implements MotorController {
       super.getController().setP(kpHigh);
     }
   }
+  
+  public void setManualOverride(boolean manualOverride) {
+    this.manualOverride = manualOverride;
+
+    if(manualOverride) {
+      disable();
+    } else {
+      enable();
+    }
+  }
+
+  public double getOutputVoltage(){
+    return outputVoltage;
+  }
+
+
 }

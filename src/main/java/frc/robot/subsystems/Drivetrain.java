@@ -18,8 +18,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drivetrain extends SubsystemBase {
   /** Creates a new Drivetrain. */
-  private MotorControllerGroup leftDrive;
-  private MotorControllerGroup rightDrive;
+  private double MAX_VELOCITY_LOW = 5.0;
+  private double MAX_VELOCITY_HIGH = 17.5;
+  private double KS_LOW = 1.0;//3.25
+  private double KS_HIGH = 1.0;//3.5
+  private double KP_LOW = 2.0;
+  private double KP_HIGH = 0.5;
+
+  private PIDMotorGroup leftDrive;
+  private PIDMotorGroup rightDrive;
   private DifferentialDrive robotDrive;
   private Encoder leftEncoder;
   private Encoder rightEncoder;
@@ -28,7 +35,6 @@ public class Drivetrain extends SubsystemBase {
   private PigeonIMU.GeneralStatus generalStatus;
   private int imuErrorCode;
   private double [] ypr;
-  
 
   public Drivetrain() {
     var collectorTalon = new WPI_TalonSRX(7);
@@ -40,37 +46,51 @@ public class Drivetrain extends SubsystemBase {
     var leftBack = new WPI_TalonSRX(1);
     var leftFront = new WPI_TalonSRX(5);
     leftTop.setInverted(true);
-    leftDrive = new MotorControllerGroup(leftTop, leftBack, leftFront);
+    
     leftTop.setNeutralMode(NeutralMode.Coast);
     leftBack.setNeutralMode(NeutralMode.Coast);
     leftFront.setNeutralMode(NeutralMode.Coast);
-
+    
   
     leftEncoder = new Encoder(4, 5, false, EncodingType.k4X); //come back to false bit, switch if forward is negative and vise versa
     leftEncoder.setDistancePerPulse( (Math.PI / 3.0) / 2048.0 );
+    leftDrive = new PIDMotorGroup(new MotorControllerGroup(leftTop, leftBack, leftFront), MAX_VELOCITY_LOW, KS_LOW, leftEncoder, KP_LOW, MAX_VELOCITY_HIGH, KS_HIGH, KP_HIGH);
 
     var rightTop = new WPI_TalonSRX(4);
     var rightBack = new WPI_TalonSRX(2);
     var rightFront = new WPI_TalonSRX(6);
     rightTop.setInverted(true);
 
-    rightDrive = new MotorControllerGroup(rightTop, rightBack, rightFront);
-    rightDrive.setInverted(true);
     rightTop.setNeutralMode(NeutralMode.Coast);
     rightBack.setNeutralMode(NeutralMode.Coast);
     rightFront.setNeutralMode(NeutralMode.Coast);
 
     rightEncoder = new Encoder(6, 7, true, EncodingType.k4X); //come back to false bit, switch if forward is negative and vise versa
     rightEncoder.setDistancePerPulse( (Math.PI / 3.0) / 2048.0 );
+    rightDrive = new PIDMotorGroup(new MotorControllerGroup(rightTop, rightBack, rightFront), MAX_VELOCITY_LOW, KS_LOW, rightEncoder, KP_LOW, MAX_VELOCITY_HIGH, KS_HIGH, KP_HIGH);
+    rightDrive.setInverted(true);
 
     robotDrive = new DifferentialDrive(leftDrive, rightDrive);
+  }
+
+  public void shiftGear(boolean inLowGear) {
+    rightDrive.shiftGear(inLowGear);
+    leftDrive.shiftGear(inLowGear);
   }
 
   public void driveRobot(double move, double turn) {
     if(turn > .85){
       turn = .85;
     }
-      robotDrive.arcadeDrive(-move, turn);
+    if(Math.abs(move) < 0.2) {
+      move = 0;
+    }
+    if(Math.abs(turn) < 0.2) {
+      turn = 0;
+    }
+    
+      robotDrive.arcadeDrive(-move, -turn);
+
   }
 
   @Override
@@ -85,6 +105,9 @@ public class Drivetrain extends SubsystemBase {
 
     SmartDashboard.putNumber("Left Distance", leftEncoder.getDistance() );
     SmartDashboard.putNumber("Right Distance", rightEncoder.getDistance() );
+
+    SmartDashboard.putNumber("Right Volts", rightDrive.getOutputVoltage() );
+    SmartDashboard.putNumber("Left Volts", leftDrive.getOutputVoltage() );
   }
 
   public void stop(){
