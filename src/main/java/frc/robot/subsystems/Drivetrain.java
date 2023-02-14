@@ -20,8 +20,8 @@ public class Drivetrain extends SubsystemBase {
   /** Creates a new Drivetrain. */
   private double MAX_VELOCITY_LOW = 5.0;
   private double MAX_VELOCITY_HIGH = 17.5;
-  private double KS_LOW = 1.0;//3.25
-  private double KS_HIGH = 1.0;//3.5
+  private double KS_LOW = 1.0; //3.25
+  private double KS_HIGH = 1.0; //3.5
   private double KP_LOW = 2.0;
   private double KP_HIGH = 0.5;
 

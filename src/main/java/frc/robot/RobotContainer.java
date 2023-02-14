@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import frc.robot.subsystems.ChickenNuggetsForUrMom;
 /*import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
@@ -54,6 +55,7 @@ public class RobotContainer {
   private final Climb climber = new Climb();
   private final Finder finder = new Finder();
   private final Targeting targeting = new Targeting();
+  private final ChickenNuggetsForUrMom eggInflation = new ChickenNuggetsForUrMom();
 
   private final CommandXboxController xbox = new CommandXboxController(2);
 

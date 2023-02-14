@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 public class PIDMotorGroup extends PIDSubsystem implements MotorController{
   private MotorControllerGroup motors;
 
-  private double kpLow;
+  private double kpLow; // proportional part of PID loop
   private double kpHigh;
 
   private double maxVelocityLow;
