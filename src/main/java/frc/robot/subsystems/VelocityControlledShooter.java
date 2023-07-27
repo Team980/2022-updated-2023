@@ -80,6 +80,6 @@ public class VelocityControlledShooter extends PIDSubsystem {
   }
 
   public void demoSpeed(){
-    setSetpoint(30);
+    setSetpoint(60);//indoor demo 30
   }
 }

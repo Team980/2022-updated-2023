@@ -23,6 +23,7 @@ public class Collector extends SubsystemBase {
   /** Creates a new Collector. */
   public Collector() {
     collect = new WPI_TalonSRX(7);
+    collect.setInverted(true);
     deployRetract = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
     grabber = new WPI_TalonSRX(8);
 

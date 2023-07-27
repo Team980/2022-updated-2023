@@ -24,16 +24,16 @@ public class Drivetrain extends SubsystemBase {
   private Encoder leftEncoder;
   private Encoder rightEncoder;
 
-  private PigeonIMU imu;
-  private PigeonIMU.GeneralStatus generalStatus;
-  private int imuErrorCode;
+  //private PigeonIMU imu;
+  //private PigeonIMU.GeneralStatus generalStatus;
+  //private int imuErrorCode;
   private double [] ypr;
   
 
   public Drivetrain() {
     var collectorTalon = new WPI_TalonSRX(7);
-    imu = new PigeonIMU(collectorTalon);
-    generalStatus = new PigeonIMU.GeneralStatus();
+    //imu = new PigeonIMU(collectorTalon);
+    //generalStatus = new PigeonIMU.GeneralStatus();
     ypr = new double [3];
 
     var leftTop = new WPI_TalonSRX(3);
@@ -76,10 +76,10 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    imuErrorCode = imu.getGeneralStatus(generalStatus).value;
-    imu.getYawPitchRoll(ypr);
-    SmartDashboard.putNumber("IMU Health", imuErrorCode);
-    SmartDashboard.putNumber("IMU Yaw", ypr[0]);
+    //imuErrorCode = imu.getGeneralStatus(generalStatus).value;
+    //imu.getYawPitchRoll(ypr);
+    //SmartDashboard.putNumber("IMU Health", imuErrorCode);
+    //SmartDashboard.putNumber("IMU Yaw", ypr[0]);
     SmartDashboard.putNumber("Left Speed", leftEncoder.getRate() );
     SmartDashboard.putNumber("Right Speed", rightEncoder.getRate() );
 
@@ -114,7 +114,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public int getIMUHealth(){
-    return imuErrorCode;
+    //return imuErrorCode;
+    return 0;
   }
 
   public double [] getYPR() {
@@ -122,6 +123,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void resetYaw(double value){
-    imu.setYaw(value);
+    //imu.setYaw(value);
   }
 }

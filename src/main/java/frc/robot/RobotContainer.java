@@ -130,7 +130,7 @@ public class RobotContainer {
     SmartDashboard.putData(autoChooser);*/
 
     drivetrain.setDefaultCommand(new RunCommand(
-      () -> drivetrain.driveRobot(xbox.getLeftY(), xbox.getRightX()), 
+      () -> drivetrain.driveRobot(xbox.getLeftY(), -xbox.getRightX()), 
       drivetrain
       ));
     shifter.setDefaultCommand(new RunCommand(shifter::setLowGear, shifter) );
